@@ -1,0 +1,17 @@
+{
+  "name": "recomp-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/k-cool/recomp-cli.git",
+  "author": "siwon <ksw3721@gmail.com>",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "recomp": "./src/index.js"
+  },
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.0",
+    "inquirer": "^9.1.4"
+  }
+}
