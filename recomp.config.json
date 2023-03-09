@@ -1,5 +1,5 @@
 {
-  "langtype": "ts",
-  "csstype": "emotion",
-  "directory": "common/test"
+  "langType": "js",
+  "styleType": "css",
+  "directory": "common"
 }

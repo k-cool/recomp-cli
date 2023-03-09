@@ -1,3 +1,3 @@
 export const LANGTYPE_DEFAULT = "js";
-export const CSSTYPE_DEFAULT = "emtion";
+export const STYLETYPE_DEFAULT = "css";
 export const DIRECTORY_DEFAULT = ".";
