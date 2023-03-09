@@ -1,5 +1,6 @@
 {
-  "langType": "js",
-  "styleType": "css",
-  "directory": "common"
+  "language": "KR",
+  "langType": "ts",
+  "styleType": "emotion",
+  "directory": "src/components"
 }
