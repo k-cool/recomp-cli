@@ -5,9 +5,13 @@ import path from "path";
 import packageInfo from "../package.json" assert { type: "json" };
 // dependancy
 import { program } from "commander";
-import inquirer from "inquirer";
 import chalk from "chalk";
 import templateFunc from "./templateFunc.js";
+import {
+  CSSTYPE_DEFAULT,
+  DIRECTORY_DEFAULT,
+  LANGTYPE_DEFAULT,
+} from "./constant.js";
 
 const exist = (dir) => {
   try {
@@ -22,6 +26,7 @@ const exist = (dir) => {
 };
 
 const mkdir = (dir) => {
+  console.log(dir);
   const dirname = path
     .relative(".", path.normalize(dir))
     .split(path.sep)
@@ -36,32 +41,32 @@ const mkdir = (dir) => {
   });
 };
 
-const makeFilePath = (type, compName, directory) => {
-  return type === "js"
+const makeFilePath = (compName, langType, directory) => {
+  return langType === "js"
     ? path.join(directory, `${compName}.jsx`)
     : path.join(directory, `${compName}.tsx`);
 };
 
-const makeTemplate = (type, compName, css) => {
-  const method = type + css;
+const makeTemplate = (compName, langType, css) => {
+  const method = langType + css;
   if (!templateFunc[method]) return false;
   return templateFunc[method](compName);
 };
 
-const createComp = (type, compName, css, directory) => {
+const createComp = (compName, langType, css, directory) => {
   mkdir(directory);
 
-  if (type !== "js" && type !== "ts")
+  if (langType !== "js" && langType !== "ts")
     return console.error(
       chalk.bold.red("타입은 html, express-router 중 하나입니다.")
     );
 
-  const filePath = makeFilePath(type, compName, directory);
+  const filePath = makeFilePath(compName, langType, directory);
 
   if (exist(filePath))
     console.error(chalk.bold.red("이미 해당 파일이 존재합니다."));
   else {
-    const tpl = makeTemplate(type, compName, css);
+    const tpl = makeTemplate(compName, langType, css);
 
     if (!tpl)
       return console.error(chalk.bold.red("올바른 css 타입을 넣어주세요"));
@@ -71,30 +76,47 @@ const createComp = (type, compName, css, directory) => {
   }
 };
 
-// createComp(type, compName, directory);
-
 program //
   .version(`${packageInfo.version}`, "-v, --version")
   .name("recomp");
 
 program
-  .command("create <type> <compname>")
-  .usage("<type> <compname> --csstype [csstype] --directory [directory]")
+  .command("create <compname>")
+  .usage(
+    "<compname> --langtype [langype] --csstype [csstype] --directory [directory] "
+  )
   .description("컴포넌트를 생성합니다.")
   .option(
-    "-c, --csstype [csstype]",
-    "사용하는 css 타입을 입력하세요.",
-    "emotion"
+    "-l, --langtype [langype]",
+    "사용하는 언어 타입(js, ts)을 입력하세요."
   )
-  .option(
-    "-d --directory [directory]",
-    "생성할 디렉토리 경로를 입력하세요",
-    "."
-  )
-  .action((type, compname, options) => {
-    console.log(type, compname, options);
-    const { csstype, directory } = options;
-    createComp(type, compname, csstype, directory);
+  .option("-c, --csstype [csstype]", "사용하는 css 타입을 입력하세요.")
+  .option("-d --directory [directory]", "생성할 디렉토리 경로를 입력하세요")
+  .action((compname, options) => {
+    if (!/^[A-Z]/.test(compname))
+      return console.error(
+        chalk.bold.red("컴포넌트의 이름은 대문자로 시작해야 합니다.")
+      );
+
+    let langtype;
+    let csstype;
+    let directory;
+
+    if (exist("./recomp.config.json")) {
+      const config = JSON.parse(
+        fs.readFileSync("./recomp.config.json").toString()
+      );
+
+      langtype = config.langtype || LANGTYPE_DEFAULT;
+      csstype = config.csstype || CSSTYPE_DEFAULT;
+      directory = config.directory || DIRECTORY_DEFAULT;
+    }
+
+    langtype = options.langtype || langtype;
+    csstype = options.csstype || csstype;
+    directory = options.directory || directory;
+
+    createComp(compname, langtype, csstype, directory);
   });
 
 program.parse(process.argv);

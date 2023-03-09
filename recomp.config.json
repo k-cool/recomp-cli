@@ -1,0 +1,5 @@
+{
+  "langtype": "ts",
+  "csstype": "emotion",
+  "directory": "common/test"
+}
