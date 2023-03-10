@@ -13,15 +13,20 @@ import TEXT_KEY, {
   LANGTYPE_DEFAULT,
 } from "./constant.js";
 
+const hasRecompConfig = exist("./recomp.config.json");
 let config;
-if (exist("./recomp.config.json"))
+let lang;
+
+if (hasRecompConfig)
   config = JSON.parse(fs.readFileSync("./recomp.config.json").toString());
 
-const lang = config.language
-  ? config.language
-  : process.env.LANG.startsWith("kr")
-  ? "KR"
-  : "EN";
+if (config)
+  lang = config.language
+    ? config.language
+    : process.env.LANG.startsWith("kr")
+    ? "KR"
+    : "EN";
+else lang = process.env.LANG.startsWith("kr") ? "KR" : "EN";
 
 const makeCompFilePath = (compName, langType, directory) => {
   return langType === "js"
@@ -114,7 +119,7 @@ program
     if (!/^[A-Z]/.test(compname))
       return console.error(chalk.bold.red(TEXT_KEY[lang].shouldUpperCase));
 
-    let customtemplatePath = options.customtemplate || config.customTemplate;
+    let customtemplatePath = options.customtemplate || config?.customTemplate;
     let template = {};
 
     if (customtemplatePath) {
@@ -125,9 +130,9 @@ program
         return console.error(chalk.bold.red(TEXT_KEY[lang].noTemplateFile));
     }
 
-    let langtype = options.langtype || config.langType || LANGTYPE_DEFAULT;
-    let styletype = options.styletype || config.styleType || STYLETYPE_DEFAULT;
-    let directory = options.directory || config.directory || DIRECTORY_DEFAULT;
+    let langtype = options.langtype || config?.langType || LANGTYPE_DEFAULT;
+    let styletype = options.styletype || config?.styleType || STYLETYPE_DEFAULT;
+    let directory = options.directory || config?.directory || DIRECTORY_DEFAULT;
     const hasTemplate = Object.keys(template).length !== 0;
 
     console.log("compname:", chalk.hex("#7cddf7")(compname));
