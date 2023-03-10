@@ -1,9 +1,18 @@
 {
   "name": "recomp-cli",
   "version": "1.0.0",
+  "description": "cli react component generator",
   "main": "index.js",
   "repository": "https://github.com/k-cool/recomp-cli.git",
   "author": "siwon <ksw3721@gmail.com>",
+  "keywords": [
+    "react",
+    "component",
+    "front-end",
+    "recomp",
+    "generater",
+    "cli"
+  ],
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -11,7 +20,6 @@
   },
   "dependencies": {
     "chalk": "^5.2.0",
-    "commander": "^10.0.0",
-    "inquirer": "^9.1.4"
+    "commander": "^10.0.0"
   }
 }
