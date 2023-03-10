@@ -1,6 +1,6 @@
 {
   "name": "recomp-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "cli react component generator",
   "main": "index.js",
   "repository": "https://github.com/k-cool/recomp-cli.git",
