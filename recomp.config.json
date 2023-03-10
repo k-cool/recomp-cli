@@ -1,6 +1,6 @@
 {
   "language": "KR",
   "langType": "ts",
-  "styleType": "emotion",
-  "directory": "src/components"
+  "styleType": "css",
+  "directory": "test"
 }

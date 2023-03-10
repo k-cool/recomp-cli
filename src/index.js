@@ -30,9 +30,7 @@ const makeCompFilePath = (compName, langType, directory) => {
 };
 
 const makeStyleFilePath = (compName, styleType, directory) => {
-  return styleType === "css"
-    ? path.join(directory, `${compName}.css`)
-    : path.join(directory, `${compName}.scss`);
+  return path.join(directory, `${compName}.css`);
 };
 
 const makeCompTemplate = (compName, langType, styleType) => {
@@ -46,9 +44,10 @@ const makeStyleTemplate = (compName, styleType) => {
   return templateFunc[styleType](compName);
 };
 
-const createComp = (compName, langType, styleType, directory) => {
+const createComp = (compName, langType, styleType, directory, template) => {
   mkdir(directory);
 
+  // 입력값 체크
   if (langType !== "js" && langType !== "ts")
     return console.error(chalk.bold.red(TEXT_KEY[lang].langTypeErr));
 
@@ -61,7 +60,9 @@ const createComp = (compName, langType, styleType, directory) => {
   if (exist(compFilePath))
     return console.error(chalk.bold.red(TEXT_KEY[lang].exFile(compFilePath)));
 
-  const tpl = makeCompTemplate(compName, langType, styleType);
+  const tpl = template.component
+    ? template.component(compName).trim()
+    : makeCompTemplate(compName, langType, styleType);
 
   if (!tpl)
     return console.error(chalk.bold.red(TEXT_KEY[lang].langStyleTypeErr));
@@ -70,7 +71,7 @@ const createComp = (compName, langType, styleType, directory) => {
   console.log(chalk.green(TEXT_KEY[lang].created(compFilePath)));
 
   // style 생성
-  if (styleType === "css" || styleType === "scss") {
+  if (styleType === "css") {
     const styleFilePath = makeStyleFilePath(compName, styleType, directory);
 
     if (exist(styleFilePath))
@@ -78,7 +79,9 @@ const createComp = (compName, langType, styleType, directory) => {
         chalk.bold.red(TEXT_KEY[lang].exFile(styleFilePath))
       );
 
-    const tpl = makeStyleTemplate(compName, styleType);
+    const tpl = template.css
+      ? template.css(compName).trim()
+      : makeStyleTemplate(compName, styleType);
 
     if (!tpl) return console.error(chalk.bold.red(TEXT_KEY[lang].styleTypeErr));
 
@@ -103,21 +106,38 @@ program
   )
   .option("-s, --styletype [styletype]", "사용하는 스타일 타입을 입력하세요.")
   .option("-d --directory [directory]", "생성할 디렉토리 경로를 입력하세요")
-  .action((compname, options) => {
+  .option(
+    "-c --customtemplate [customtemplate]",
+    "커스텀 템플릿의 디렉토리 경로를 입력하세요"
+  )
+  .action(async (compname, options) => {
     if (!/^[A-Z]/.test(compname))
-      return console.error(
-        chalk.bold.red("컴포넌트의 이름은 대문자로 시작해야 합니다.")
-      );
+      return console.error(chalk.bold.red(TEXT_KEY[lang].shouldUpperCase));
+
+    let customtemplatePath = options.customtemplate || config.customTemplate;
+    let template = {};
+
+    if (customtemplatePath) {
+      if (exist(customtemplatePath)) {
+        const dir = `${path.resolve()}/${customtemplatePath}`;
+        template = await import(dir).then((t) => t.template);
+      } else
+        return console.error(chalk.bold.red(TEXT_KEY[lang].noTemplateFile));
+    }
 
     let langtype = options.langtype || config.langType || LANGTYPE_DEFAULT;
     let styletype = options.styletype || config.styleType || STYLETYPE_DEFAULT;
     let directory = options.directory || config.directory || DIRECTORY_DEFAULT;
+    const hasTemplate = Object.keys(template).length !== 0;
 
     console.log("compname:", chalk.hex("#7cddf7")(compname));
     console.log("langtype:", chalk.hex("#7cddf7")(langtype));
     console.log("styletype:", chalk.hex("#7cddf7")(styletype));
     console.log("directory:", chalk.hex("#7cddf7")(directory));
-    createComp(compname, langtype, styletype, directory);
+    if (hasTemplate)
+      console.log("template:", chalk.hex("#7cddf7")(Object.keys(template)));
+
+    createComp(compname, langtype, styletype, directory, template);
   });
 
 program.parse(process.argv);
